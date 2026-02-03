@@ -1,0 +1,3 @@
+{"__type__": "Patient", "phn": 123, "name": "brian", "birth_date": "", "phone": "", "email": "", "address": ""}
+{"__type__": "Patient", "phn": 123456, "name": "audrik", "birth_date": "", "phone": "", "email": "", "address": ""}
+{"__type__": "Patient", "phn": 0, "name": "testA", "birth_date": "oct 1", "phone": "4329820914", "email": "xyz@gmail.com", "address": "32 Drive"}

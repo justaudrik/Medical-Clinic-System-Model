@@ -1,0 +1,105 @@
+import sys
+from PyQt6.QtCore import Qt
+from clinic.exception.invalid_login_exception import InvalidLoginException
+from clinic.exception.duplicate_login_exception import DuplicateLoginException
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt6.QtWidgets import QLabel, QLineEdit, QPushButton, QMessageBox
+from PyQt6.QtWidgets import QGridLayout, QVBoxLayout, QHBoxLayout, QStackedLayout
+from clinic.gui.main_menu_gui import MainMenuGUI
+from clinic.controller import Controller 
+
+class ClinicGUI(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.controller = Controller(autosave=True)
+        self.setWindowTitle("Medical Clinic System")
+        self.stackedLayout = QStackedLayout()
+        self.main_menu_gui = MainMenuGUI(self.controller)
+        self.stackedLayout.addWidget(self.homeScreen())
+        self.stackedLayout.addWidget(self.loginScreen())
+        self.stackedLayout.addWidget(self.main_menu_gui.mainMenu())
+        
+        widget = QWidget()
+        widget.setLayout(self.stackedLayout)
+        self.setCentralWidget(widget)
+
+    def homeScreen(self):
+        homeScreenWidget = QWidget()
+        homeScreenOptions = QVBoxLayout()
+
+        loginButton = QPushButton("Login")
+        loginButton.setCheckable(True)
+        loginButton.clicked.connect(self.loginButtonClick)
+        
+        quitButton = QPushButton("Quit")
+        quitButton.setCheckable(True)
+        quitButton.clicked.connect(self.quitButtonClick)
+
+        homeScreenOptions.addWidget(loginButton)
+        homeScreenOptions.addWidget(quitButton)
+
+        homeScreenWidget.setLayout(homeScreenOptions)
+        return homeScreenWidget
+
+    def loginButtonClick(self):
+        self.stackedLayout.setCurrentIndex(1)
+    def quitButtonClick(self):
+        sys.exit()
+
+    def loginScreen(self):
+        loginScreenWidget = QWidget()
+        loginScreenLayout = QVBoxLayout()
+
+        userInput = QLineEdit(self)
+        userInput.setPlaceholderText("Enter your username")
+        
+        passInput = QLineEdit(self)
+        passInput.setPlaceholderText("Enter your password")
+        passInput.setEchoMode(QLineEdit.EchoMode.Password)
+
+        buttonOptionLayout = QHBoxLayout()
+
+        backButton = QPushButton("Back")
+        backButton.setCheckable(True)
+        backButton.clicked.connect(lambda: self.backButtonClick(userInput, passInput))
+
+        enterButton = QPushButton("Enter")
+        enterButton.setCheckable(True)
+        enterButton.clicked.connect(lambda: self.enterButtonClick(userInput, passInput))
+
+        buttonOptionLayout.addWidget(backButton)
+        buttonOptionLayout.addWidget(enterButton)
+
+        loginScreenLayout.addWidget(userInput)
+        loginScreenLayout.addWidget(passInput)
+        loginScreenLayout.addLayout(buttonOptionLayout)
+
+        loginScreenWidget.setLayout(loginScreenLayout)
+        return loginScreenWidget
+
+    def backButtonClick(self, userInput, passInput):
+        self.stackedLayout.setCurrentIndex(0)
+        userInput.clear()
+        passInput.clear()
+    def enterButtonClick(self, userInput, passInput):
+        try:
+            username = userInput.text()
+            password = passInput.text()
+            self.controller.login(username, password)
+            self.stackedLayout.setCurrentIndex(2)
+        except InvalidLoginException:
+           QMessageBox.warning(self, "Invalid Login", "Please try again")
+           userInput.clear()
+           passInput.clear()
+
+
+def main():
+    app = QApplication(sys.argv)
+    window = ClinicGUI()
+    window.setMinimumSize(400, 300)
+    window.show()
+    app.exec()
+
+if __name__ == '__main__':
+    main()
